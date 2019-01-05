@@ -20,11 +20,22 @@ f = open("elecy.cvs", "a")
 #currentwatts = 0
 #lasttime=0
 
+def is_time_between(begin_time, end_time, check_time=None):
+    # If check time is not given, default to current UTC time
+    check_time = check_time or datetime.utcnow().time()
+    if begin_time < end_time:
+        return check_time >= begin_time and check_time <= end_time
+    else: # crosses midnight
+        return check_time >= begin_time or check_time <= end_time
+
+#print(is_time_between(time(23,0), time(8,00)))
 class App():
     def __init__(self):
         self.root = tk.Tk()
         self.textinfo = "starting"
         self.revcount = 0
+        self.daycount = 0
+        self.nightcount = 0
         self.currentwatts = 0
         self.lastime = datetime.datetime.now()
         self.label = tk.Label(text=self.textinfo)
@@ -38,12 +49,16 @@ class App():
 	if g.input(21):
 	    print('Input was HIGH')
 	    self.revcount+=1
+            if is_time_between(time(23,0), time(8,00)):
+               self.nightcount+=1
+            else:
+               self.daycount+=1
 	    secondspassed = (datetime.datetime.now() - self.lasttime).total_seconds() 
 	    self.currentwatts = round((3600 / secondspassed),2)
 		#print(str(secondspassed))
 	    print(str(datetime.datetime.now()) + " " + str(self.revcount) + "Wh " + str(self.currentwatts) + "W")
             f = open("elecy.cvs", "a")
-	    f.write(str(datetime.datetime.now()) + " " + str(self.revcount) + "Wh " + str(self.currentwatts) + "W" + "\n")
+	    f.write(str(datetime.datetime.now()) + " " + str(self.revcount) + "Wh " + str(self.currentwatts) + "W " + str(self.daycount) + "Wh "+ str(self.nightcount) + "nWh "  + "\n")
             f.close()
 	    self.textinfo= "".join(str(self.revcount) + "Wh " + str(self.currentwatts) + "W")
 	    self.label.configure(text=self.textinfo)

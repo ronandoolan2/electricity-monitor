@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+#from datetime import datetime, time
 import time
 import datetime
 import RPi.GPIO as g
@@ -8,6 +8,7 @@ import Tkinter as tk
 from time import sleep
 import os
 os.environ['DISPLAY'] = ":0"
+
 
 g.setmode(g.BCM)
 #g.setup(20, g.OUT)
@@ -20,13 +21,6 @@ f = open("elecy.cvs", "a")
 #currentwatts = 0
 #lasttime=0
 
-def is_time_between(begin_time, end_time, check_time=None):
-    # If check time is not given, default to current UTC time
-    check_time = check_time or datetime.utcnow().time()
-    if begin_time < end_time:
-        return check_time >= begin_time and check_time <= end_time
-    else: # crosses midnight
-        return check_time >= begin_time or check_time <= end_time
 
 #print(is_time_between(time(23,0), time(8,00)))
 class App():
@@ -45,11 +39,24 @@ class App():
         self.update_clock()
         self.root.mainloop()
 
+    def is_time_between(self, begin_time, end_time, check_time=None):
+        # If check time is not given, default to current UTC time
+        check_time = datetime.datetime.now().time()
+        print check_time
+        print begin_time
+        print end_time
+        #check_time = check_time or datetime.datetime.utcnow().time()
+        if begin_time < end_time:
+            return check_time >= begin_time and check_time <= end_time
+        else: # crosses midnight
+            return check_time >= begin_time or check_time <= end_time
+
     def update_clock(self):
 	if g.input(21):
 	    print('Input was HIGH')
 	    self.revcount+=1
-            if is_time_between(time(23,0), time(8,00)):
+            datetime.time(23,0)
+            if(self.is_time_between(datetime.time(23,0), datetime.time(8,00))):
                self.nightcount+=1
             else:
                self.daycount+=1
@@ -58,7 +65,7 @@ class App():
 		#print(str(secondspassed))
 	    print(str(datetime.datetime.now()) + " " + str(self.revcount) + "Wh " + str(self.currentwatts) + "W")
             f = open("elecy.cvs", "a")
-	    f.write(str(datetime.datetime.now()) + " " + str(self.revcount) + "Wh " + str(self.currentwatts) + "W " + str(self.daycount) + "Wh "+ str(self.nightcount) + "nWh "  + "\n")
+	    f.write(str(datetime.datetime.now()) + " " + str(self.revcount) + "Wh " + str(self.currentwatts) + "W " + str(self.daycount) + "dWh "+ str(self.nightcount) + "nWh "  + "\n")
             f.close()
 	    self.textinfo= "".join(str(self.revcount) + "Wh " + str(self.currentwatts) + "W")
 	    self.label.configure(text=self.textinfo)

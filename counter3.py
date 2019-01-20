@@ -7,10 +7,14 @@ import Tkinter as tk
 #from PIL import Image, ImageTkimport 
 from time import sleep
 import os
+import imp
+from influxdb import InfluxDBClient
 os.environ['DISPLAY'] = ":0"
-
+bash_module = imp.load_source("bash_module", "/home/pi/elecy.cfg")
 
 g.setmode(g.BCM)
+dbclient = InfluxDBClient('127.0.0.1', 8086)
+dbclient.switch_database('elecy')
 #g.setup(20, g.OUT)
 #g.output(20, 1)
 g.setup(21, g.IN, pull_up_down=g.PUD_DOWN) 
@@ -27,9 +31,10 @@ class App():
     def __init__(self):
         self.root = tk.Tk()
         self.textinfo = "starting"
-        self.revcount = 0
-        self.daycount = 0
-        self.nightcount = 0
+        self.revcount = bash_module.TOTAL
+        self.minorcount = bash_module.MINOR
+        self.daycount = bash_module.DAY 
+        self.nightcount = bash_module.NIGHT 
         self.currentwatts = 0
         self.lastime = datetime.datetime.now()
         self.label = tk.Label(text=self.textinfo)
@@ -55,6 +60,7 @@ class App():
 	if g.input(21):
 	    print('Input was HIGH')
 	    self.revcount+=1
+            self.minorcount+=1
             datetime.time(23,0)
             if(self.is_time_between(datetime.time(23,0), datetime.time(8,00))):
                self.nightcount+=1
@@ -65,8 +71,18 @@ class App():
 		#print(str(secondspassed))
 	    print(str(datetime.datetime.now()) + " " + str(self.revcount) + "Wh " + str(self.currentwatts) + "W")
             f = open("elecy.cvs", "a")
-	    f.write(str(datetime.datetime.now()) + " " + str(self.revcount) + "Wh " + str(self.currentwatts) + "W " + str(self.daycount) + "dWh "+ str(self.nightcount) + "nWh "  + "\n")
+	    f.write(str(datetime.datetime.now()) + " " + str(self.revcount) + "Wh " + str(self.currentwatts) + "W " + str(self.daycount) + "dWh "+ str(self.nightcount) + "nWh " + str(self.minorcount) + "Wh"  + "\n")
             f.close()
+            json_body = [
+                {
+                    "measurement": "watts",
+                    "time": datetime.datetime.now(),
+                    "fields": {
+                        "watts": self.currentwatts
+                    }
+                } 
+            ]
+            dbclient.write_points(json_body)
 	    self.textinfo= "".join(str(self.revcount) + "Wh " + str(self.currentwatts) + "W")
 	    self.label.configure(text=self.textinfo)
             self.label.pack()

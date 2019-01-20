@@ -16,7 +16,8 @@ The results are displayed on grafana
 
 First turn off your mains. Then attach the DIN counter in series with your main breaker. The DIN is only rated to 30A so make sure the breaker before it is 30A. If not install a 30A breaker before it. 
 
-Next attach two wires to the counter pins to your raspberry pi. The DIN requires 5V so I made a simple voltage spliter to make sure only 3.3V was going to the pi.
+Next attach two wires to the counter pins to your raspberry pi. The DIN requires 5V so I made a simple voltage divider to make sure only 3.3V was going to the pi.
+![alt text](https://i.stack.imgur.com/UEQNP.png)
 
 Set up the counter scipt to run on boot by adding the following lines to ~/.config/lxsession/LXDE-pi/autostart
 

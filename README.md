@@ -12,7 +12,7 @@ The results are displayed on grafana
 
 ![alt text](https://github.com/ronandoolan2/electricity-monitor/blob/master/Sample-usage.png)
 
-Set up 
+# Set up 
 
 First turn off your mains. Then attach the DIN counter in series with your main breaker. The DIN is only rated to 30A so make sure the breaker before it is 30A. If not install a 30A breaker before it. 
 
